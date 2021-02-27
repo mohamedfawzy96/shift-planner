@@ -3,7 +3,9 @@ import time
 
 
 class Schedule:
-    schedule_arr = []
+
+    def __init__(self, cols: int = 4):
+        self.schedule_arr = np.empty((0, 4))
 
     @staticmethod
     def format_day(day_index: int) -> str:
@@ -22,11 +24,17 @@ class Schedule:
                Schedule.format_day(day_index),
                Schedule.format_route(routes_index),
                Schedule.format_shift(shift_index)]
-        self.schedule_arr.append(row)
+        self.schedule_arr = np.append(self.schedule_arr, np.array([row]), axis=0)
         return row
 
-    def get_schedule_as_np(self) -> np.array:
-        return np.array(self.schedule_arr)
+    def get_schedule(self) -> np.array:
+        return self.schedule_arr
+
+    def get_days_columns(self):
+        return self.get_schedule()[:, 1]
+
+    def get_drivers_columns(self):
+        return self.get_schedule()[:, 0]
 
 
 class ScheduleService:

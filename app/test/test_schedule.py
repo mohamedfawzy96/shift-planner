@@ -5,12 +5,14 @@ from app.services import ScheduleService, Schedule
 
 schedule_service = ScheduleService()
 schedule = schedule_service.create_schedule()
-np_schedule = schedule.get_schedule_as_np()
+np_schedule = schedule.get_schedule()
 
 
 @pytest.mark.parametrize("day_index", [i for i in range(schedule_service.get_no_days())])
 def test_all_shifts_assigned(day_index):
-    is_day = np_schedule[:, 1] == Schedule.format_day(day_index)
+    """Test every shift of the day for each route is assigned"""
+    days_col = schedule.get_days_columns()
+    is_day = days_col == Schedule.format_day(day_index)
     number_of_shifts = np.sum(is_day)
 
     no_routes = schedule_service.get_no_routes()
@@ -19,5 +21,12 @@ def test_all_shifts_assigned(day_index):
     assert number_of_shifts == no_routes * no_shifts
 
 
-# @pytest.mark.parametrize("day_index", [i for i in range(schedule_service.get_no_days())])
-# def unique_drivers_in_day(day_index):
+@pytest.mark.parametrize("day_index", [i for i in range(schedule_service.get_no_days())])
+def unique_drivers_in_day(day_index):
+    """Test every shift for every route of the day has unique driver"""
+    days_col = schedule.get_days_columns()
+    day_indexes = np.argwhere(days_col == schedule.format_day(day_index))
+
+    drivers_col = schedule.get_drivers_columns()
+    drivers = drivers_col[day_indexes]
+    assert len(drivers) == len(np.unique(drivers))
