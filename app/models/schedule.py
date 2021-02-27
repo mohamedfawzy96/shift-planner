@@ -44,15 +44,8 @@ class Schedule:
         formated_route = Schedule.format_route(route_index)
         return self.get_routes_dict()[formated_route]["drivers"]
 
-    def is_driver_used(self, day: int, driver_id: int):
-        drivers_dict = self.get_drivers_dict()
-        driver_format = self.format_driver(driver_id)
-        day_format = self.format_day(day)
-
-        driver_dict = drivers_dict.get(driver_format, {})
-        driver_used = driver_dict.get(day_format, False)
-
-        return driver_used
+    def is_driver_used(self, day_index: int, shift_index: int, driver_id: int):
+        return self.is_driver_day_used(day_index, driver_id) or self.is_driver_shift_used(shift_index, driver_id)
 
     def get_day_dict(self):
         return self.schedule_dict["days"]
@@ -62,6 +55,22 @@ class Schedule:
 
     def get_drivers_dict(self):
         return self.schedule_dict["drivers"]
+
+    def is_driver_day_used(self, day_index: int, driver_id: int):
+        drivers_dict = self.get_drivers_dict()
+        driver_format = self.format_driver(driver_id)
+        day_format = self.format_day(day_index)
+        driver_dict_days = drivers_dict.get(driver_format, {}).get("days", {})
+        driver_used = driver_dict_days.get(day_format, False)
+        return driver_used
+
+    def is_driver_shift_used(self, shift_index: int, driver_id: int) -> bool:
+        drivers_dict = self.get_drivers_dict()
+        driver_format = self.format_driver(driver_id)
+        shift_format = self.format_shift(shift_index)
+        driver_dict_shifts = drivers_dict.get(driver_format, {}).get("shifts", {})
+        driver_used = driver_dict_shifts.get(shift_format, 0) > 4
+        return driver_used
 
     def add_row(self, driver_id: int, day_index: int, routes_index: int, shift_index: int) -> list:
         row = [driver_id,
@@ -88,7 +97,12 @@ class Schedule:
         drivers_dict = self.get_drivers_dict()
         driver_formated = Schedule.format_driver(driver_id)
         driver = drivers_dict.get(driver_formated, {})
-        driver[day_formatted] = True
+        driver["days"] = driver.get("days", {})
+        driver["days"][day_formatted] = True
+
+        driver_shifts = driver.get("shifts", {})
+        driver_shifts[shift_formated] = driver_shifts.get(shift_formated, 0) + 1
+        driver["shifts"] = driver_shifts
         drivers_dict[driver_formated] = driver
 
     def __add_driver_arr_to_dict(self, formated_col: str, driver_id: int, parent_dict: dict):
