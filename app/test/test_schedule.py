@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 from app.models import Schedule
-from app.services import ScheduleService
+from app.services import ScheduleService, TableService
 
 schedule_service = ScheduleService()
 schedule = schedule_service.create_schedule()
@@ -25,10 +25,15 @@ def test_all_shifts_assigned(day_index):
 @pytest.mark.parametrize("day_index", [i for i in range(schedule_service.get_no_days())])
 def test_unique_drivers_in_day(day_index):
     """Test every shift for every route of the day has unique driver"""
-    days_col = schedule.get_days_columns()
-    day_indexes = np.argwhere(days_col == schedule.format_day(day_index))
-
-    drivers_col = schedule.get_drivers_columns()
-    drivers = drivers_col[day_indexes]
+    drivers = schedule.get_day_drivers(day_index)
     assert len(drivers) == len(np.unique(drivers))
 
+
+@pytest.mark.parametrize("day_index", [i for i in range(schedule_service.get_no_days())])
+def test_forced_days_off(day_index):
+    """Test every shift for every route of the day has unique driver"""
+    forced_day_ser = TableService('forced_day_off.csv')
+    day_drivers = schedule.get_day_drivers(day_index)
+    off_drivers = forced_day_ser.get_drivers_for_index(day_index)
+    sub = list(set(day_drivers) - set(off_drivers))
+    assert len(day_drivers) == len(sub)

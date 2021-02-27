@@ -5,6 +5,7 @@ class Schedule:
 
     def __init__(self, cols: int = 4):
         self.schedule_arr = np.empty((0, 4))
+        self.schedule_dict = {}
 
     @staticmethod
     def format_day(day_index: int) -> str:
@@ -24,7 +25,18 @@ class Schedule:
                Schedule.format_route(routes_index),
                Schedule.format_shift(shift_index)]
         self.schedule_arr = np.append(self.schedule_arr, np.array([row]), axis=0)
+        self.add_to_dict(driver_id, day_index, routes_index, shift_index)
+
         return row
+
+    def add_to_dict(self, driver_id: int, day_index: int, routes_index: int, shift_index: int):
+        formated_day = Schedule.format_day(day_index)
+
+        day_dict = self.schedule_dict.get(formated_day, {})
+        day_drivers = day_dict.get("drivers", [])
+        day_drivers.append(driver_id)
+        day_dict["drivers"] = day_drivers
+        self.schedule_dict[formated_day] = day_dict
 
     def get_schedule(self) -> np.array:
         return self.schedule_arr
@@ -34,3 +46,7 @@ class Schedule:
 
     def get_drivers_columns(self):
         return self.get_schedule()[:, 0]
+
+    def get_day_drivers(self, day_index):
+        formated_day = Schedule.format_day(day_index)
+        return self.schedule_dict[formated_day]["drivers"]

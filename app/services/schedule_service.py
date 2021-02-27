@@ -14,9 +14,9 @@ class ScheduleService:
     route_scores = []
     min_available_score = 0
 
-    def __init__(self, forced_days_file: str = './data/forced_day_off.csv',
-                 qualified_route_file: str = './data/qualified_route.csv',
-                 pref_days_file: str = './data/pref_day_off.csv',
+    def __init__(self, forced_days_file: str = 'forced_day_off.csv',
+                 qualified_route_file: str = 'qualified_route.csv',
+                 pref_days_file: str = 'pref_day_off.csv',
                  number_of_days: int = 14,
                  number_of_routes: int = 3,
                  number_of_shifts: int = 2):
