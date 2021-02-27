@@ -1,6 +1,7 @@
 import numpy as np
 import time
 from app.models import Schedule
+from .table_service import TableService
 
 
 class ScheduleService:
@@ -20,16 +21,13 @@ class ScheduleService:
                  number_of_routes: int = 3,
                  number_of_shifts: int = 2):
 
-        self.forced_days_off_raw_data = np.genfromtxt(forced_days_file, delimiter=',', skip_header=True)
-        self.qualified_route_raw_data = np.genfromtxt(qualified_route_file, delimiter=',', skip_header=True)
-        self.preferred_days_off_raw_data = np.genfromtxt(pref_days_file, delimiter=',', skip_header=True)
+        self.qual_route_ser = TableService(qualified_route_file)
+        self.forced_days_ser = TableService(forced_days_file)
+        self.perfer_days_ser = TableService(pref_days_file)
 
-        self.qualified_route_matrix = self.qualified_route_raw_data[:, 1:]
-        self.forced_days_off_matrix = self.forced_days_off_raw_data[:, 1:]
-        self.preferred_days_off_matrix = self.preferred_days_off_raw_data[:, 1:]
+        self.drivers_ids = self.forced_days_ser.get_drivers()
 
-        self.drivers_ids = self.forced_days_off_raw_data[:, 0]
-        self.days_scores = self.forced_days_off_matrix * 0
+        self.days_scores = np.zeros(self.forced_days_ser.get_matrix().shape)
 
         self.number_of_days = number_of_days
         self.number_of_routes = number_of_routes
@@ -49,10 +47,11 @@ class ScheduleService:
 
     def __compute_scores_without_routes(self):
         def compute_forc_day_off_scr():
-            self.days_scores = self.days_scores + (self.forced_days_off_matrix * self.weights_values["forced_days"])
+            forced_matrix = self.forced_days_ser.get_matrix()
+            self.days_scores = self.days_scores + (forced_matrix * self.weights_values["forced_days"])
 
         def compute_pref_day_off_scr():
-            invert_pref_day = self.preferred_days_off_matrix == 0
+            invert_pref_day = self.perfer_days_ser.get_matrix() == 0
             self.days_scores = self.days_scores + (invert_pref_day * self.weights_values["pref_working_days"])
 
         score_funcs = [compute_forc_day_off_scr]
@@ -60,9 +59,11 @@ class ScheduleService:
             score_func()
 
     def get_scores_for_route(self, route_number: int):
-        route_col = self.qualified_route_matrix[:, route_number]
+
+        route_col = self.qual_route_ser.get_matrix()[:, route_number]
         invert_route_col = route_col == 0
         invert_route_col = invert_route_col.reshape(route_col.shape[0], 1)
+
         route_score_matrix = self.days_scores + (invert_route_col * self.weights_values["routes"])
         return route_score_matrix
 
