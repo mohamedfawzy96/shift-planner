@@ -23,7 +23,7 @@ def test_all_shifts_assigned(day_index):
 
 
 @pytest.mark.parametrize("day_index", [i for i in range(schedule_service.get_no_days())])
-def unique_drivers_in_day(day_index):
+def test_unique_drivers_in_day(day_index):
     """Test every shift for every route of the day has unique driver"""
     days_col = schedule.get_days_columns()
     day_indexes = np.argwhere(days_col == schedule.format_day(day_index))
@@ -31,3 +31,4 @@ def unique_drivers_in_day(day_index):
     drivers_col = schedule.get_drivers_columns()
     drivers = drivers_col[day_indexes]
     assert len(drivers) == len(np.unique(drivers))
+
