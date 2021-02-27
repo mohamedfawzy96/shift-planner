@@ -7,12 +7,13 @@ from .table_service import TableService
 class ScheduleService:
     driver_id_index = 0
     weights_values = {
-        "routes": -10,
-        "forced_days": -10,
-        "pref_working_days": 1
+        "routes": -20,
+        "forced_days": -20,
+        "pref_working_days": -1
     }
     route_days_scores = []
     min_available_score = 0
+    init_score = 10
 
     def __init__(self, forced_days_file: str = 'forced_day_off.csv',
                  qualified_route_file: str = 'qualified_route.csv',
@@ -27,7 +28,7 @@ class ScheduleService:
 
         self.drivers_ids = self.forced_days_ser.get_drivers()
 
-        self.days_scores = np.zeros(self.forced_days_ser.get_matrix().shape)
+        self.days_scores = np.zeros(self.forced_days_ser.get_matrix().shape) + self.init_score
 
         self.number_of_days = number_of_days
         self.number_of_routes = number_of_routes
@@ -54,7 +55,7 @@ class ScheduleService:
             invert_pref_day = self.perfer_days_ser.get_matrix() == 0
             self.days_scores = self.days_scores + (invert_pref_day * self.weights_values["pref_working_days"])
 
-        score_funcs = [compute_forc_day_off_scr]
+        score_funcs = [compute_forc_day_off_scr, compute_pref_day_off_scr]
         for score_func in score_funcs:
             score_func()
 
@@ -90,6 +91,8 @@ class ScheduleService:
         for i in range(self.get_no_routes()):
             route_day_score = self.__get_scores_for_days_route(i)
             self.route_days_scores.append(route_day_score)
+        print(self.route_days_scores[0])
+
 
     def __get_routes_srt_by_dri_cnt(self, day: int):
         """
@@ -127,28 +130,14 @@ class ScheduleService:
                 number_of_drivers = len(route_drivers_sorted)
                 while shift_index < self.get_no_shifts() and driver_counter <= number_of_drivers:
                     driver_id = route_drivers_sorted[-driver_counter]
-                    drivers_left = number_of_drivers - driver_counter
                     driver_counter += 1
-                    if not self.__pass_rules(schedule,
-                                             day_index,
-                                             shift_index,
-                                             driver_id,
-                                             drivers_left):
+                    if schedule.is_driver_day_used(day_index, driver_id):
                         continue
-
                     self.test(routes_index, driver_id, day_index)
                     schedule.add_row(driver_id, day_index, routes_index, shift_index)
                     shift_index += 1
 
         return schedule
-
-    def __pass_rules(self, schedule: Schedule, day_index: int, shift_index: int, driver_id: int, drivers_left: int):
-        if schedule.is_driver_day_used(day_index, driver_id):
-            return False
-        if shift_index == 1:
-            if schedule.is_driver_shift_used(shift_index, driver_id) and drivers_left > 1:
-                return False
-        return True
 
     def test(self, routes_index, driver_id, day):
         score_route = self.route_days_scores[routes_index]
