@@ -30,13 +30,22 @@ class Schedule:
         return row
 
     def add_to_dict(self, driver_id: int, day_index: int, routes_index: int, shift_index: int):
-        formated_day = Schedule.format_day(day_index)
+        day_formated_col = Schedule.format_day(day_index)
+        self.__add_driver_to_dict(day_formated_col, driver_id)
 
-        day_dict = self.schedule_dict.get(formated_day, {})
-        day_drivers = day_dict.get("drivers", [])
-        day_drivers.append(driver_id)
-        day_dict["drivers"] = day_drivers
-        self.schedule_dict[formated_day] = day_dict
+        route_formated_col = Schedule.format_route(routes_index)
+        self.__add_driver_to_dict(route_formated_col, driver_id)
+
+    def __add_driver_to_dict(self, formated_col, driver_id):
+        ob_dict = self.schedule_dict.get(formated_col, {})
+        ob_dict = self.__add_drivers_to_dict_helper(ob_dict, driver_id)
+        self.schedule_dict[formated_col] = ob_dict
+
+    def __add_drivers_to_dict_helper(self, ob_dict, driver_id):
+        drivers = ob_dict.get("drivers", [])
+        drivers.append(driver_id)
+        ob_dict["drivers"] = drivers
+        return ob_dict
 
     def get_schedule(self) -> np.array:
         return self.schedule_arr
@@ -50,3 +59,7 @@ class Schedule:
     def get_day_drivers(self, day_index):
         formated_day = Schedule.format_day(day_index)
         return self.schedule_dict[formated_day]["drivers"]
+
+    def get_route_drivers(self, route_index):
+        formated_route = Schedule.format_route(route_index)
+        return self.schedule_dict[formated_route]["drivers"]

@@ -5,11 +5,11 @@ schedule_service = ScheduleService()
 schedule = schedule_service.create_schedule()
 print(schedule.get_schedule())
 
-forced_day_ser = TableService('forced_day_off.csv')
-day_drivers = schedule.get_day_drivers(0)
-off_drivers = forced_day_ser.get_drivers_for_index(0)
-print(day_drivers)
-print(off_drivers)
+route_driver_ser = TableService('qualified_route.csv')
+route_drivers = schedule.get_route_drivers(0)
+qual_route_drivers = route_driver_ser.get_drivers_for_index(0)
+sub = list(set(route_drivers) - set(qual_route_drivers))
 
-print(set(day_drivers) - set(off_drivers))
+print(set(route_drivers) - set(qual_route_drivers))
+print(qual_route_drivers)
 

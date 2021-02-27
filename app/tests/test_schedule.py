@@ -37,3 +37,13 @@ def test_forced_days_off(day_index):
     off_drivers = forced_day_ser.get_drivers_for_index(day_index)
     sub = list(set(day_drivers) - set(off_drivers))
     assert len(day_drivers) == len(sub)
+
+
+@pytest.mark.parametrize("route_index", [i for i in range(schedule_service.get_no_routes())])
+def test_route_off(route_index):
+    """Test every shift for every route of the day has unique driver"""
+    route_driver_ser = TableService('qualified_route.csv')
+    route_drivers = schedule.get_route_drivers(route_index)
+    qual_route_drivers = route_driver_ser.get_drivers_for_index(route_index)
+    sub = list(set(route_drivers) - set(qual_route_drivers))
+    assert len(sub) == 0
