@@ -1,7 +1,8 @@
 import pytest
 import numpy as np
 
-from app.services import ScheduleService, Schedule
+from app.models import Schedule
+from app.services import ScheduleService
 
 schedule_service = ScheduleService()
 schedule = schedule_service.create_schedule()
