@@ -17,7 +17,7 @@ OUTPUT_BASE_DIR = "./data/output/"
 
 time = t.time()
 file = OUTPUT_BASE_DIR + str(int(time)) + "_schedule.csv"
-np.savetxt(file, schedule.get_schedule_array(), delimiter=',', fmt='%s')
+np.savetxt(file, schedule.get_schedule_array(), delimiter=',', fmt='%s', header="driver,day,route,shift", comments='')
 print("########################################")
 print("\n")
 print("Please find schedule in this file: " + file)
