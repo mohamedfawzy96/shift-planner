@@ -6,7 +6,7 @@ class TableService:
 
     def __init__(self,
                  file: str):
-        self.raw_data = np.genfromtxt(self.base_dir + file, delimiter=',', skip_header=True)
+        self.raw_data = np.genfromtxt(self.base_dir + file, delimiter=',', skip_header=True, dtype=int)
         self.matrix = self.raw_data[:, 1:]
 
     def get_matrix(self) -> np.array:

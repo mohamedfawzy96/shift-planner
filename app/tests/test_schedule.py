@@ -4,12 +4,12 @@ import numpy as np
 from app.models import Schedule
 from app.services import ScheduleService, TableService
 
-case = "case2"
+case = "case1"
 schedule_service = ScheduleService(forced_days_file=case + '/forced_day_off.csv',
                                    qualified_route_file=case + '/qualified_route.csv',
                                    pref_days_file=case + '/pref_day_off.csv', )
 schedule = schedule_service.create_schedule()
-np_schedule = schedule.get_schedule()
+np_schedule = schedule.get_schedule_array()
 
 
 @pytest.mark.parametrize("day_index", [i for i in range(schedule_service.get_no_days())])

@@ -27,14 +27,14 @@ class Schedule:
     def format_driver(driver_id: int) -> str:
         return "driver" + str(driver_id)
 
-    def get_schedule(self) -> np.array:
+    def get_schedule_array(self) -> np.array:
         return self.schedule_arr
 
     def get_days_columns(self):
-        return self.get_schedule()[:, 1]
+        return self.get_schedule_array()[:, 1]
 
     def get_drivers_columns(self):
-        return self.get_schedule()[:, 0]
+        return self.get_schedule_array()[:, 0]
 
     def get_day_drivers(self, day_index: int):
         formated_day = Schedule.format_day(day_index)
