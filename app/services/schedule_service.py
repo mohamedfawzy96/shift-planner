@@ -7,13 +7,14 @@ from .table_service import TableService
 class ScheduleService:
     driver_id_index = 0
     weights_values = {
-        "routes": -1000,
-        "forced_days": -1000,
-        "pref_working_days": -1
+        "routes": -100,
+        "forced_days": -100,
+        "pref_working_days": -1,
+        "driver_used": -2
     }
     route_days_scores = []
     min_available_score = 0
-    init_score = 10
+    init_score = 20
 
     def __init__(self, forced_days_file: str = 'forced_day_off.csv',
                  qualified_route_file: str = 'qualified_route.csv',
@@ -29,7 +30,7 @@ class ScheduleService:
         self.drivers_ids = self.forced_days_ser.get_drivers()
 
         self.days_scores = np.zeros(self.forced_days_ser.get_matrix().shape) + self.init_score
-
+        self.drivers_scores = np.zeros(self.forced_days_ser.get_matrix().shape)
         self.number_of_days = number_of_days
         self.number_of_routes = number_of_routes
         self.number_of_shifts = number_of_shifts
@@ -45,6 +46,9 @@ class ScheduleService:
 
     def get_no_routes(self) -> int:
         return self.number_of_routes
+
+    def get_driver_id_by_index(self, driver_index: int):
+        return self.drivers_ids[driver_index]
 
     def __compute_scores_without_routes(self):
         def compute_forc_day_off_scr():
@@ -72,16 +76,19 @@ class ScheduleService:
         route_score_matrix = self.days_scores + (invert_route_col * self.weights_values["routes"])
         return route_score_matrix
 
-    def __get_available_drivers_for_route(self, day: int, route: int) -> np.array:
+    def get_available_drivers_for_route(self, day: int, route: int) -> np.array:
         """
-        :param day: index of day
-        :param route: index of route
-        :return: array of available driver ids sorted ASC by their score for this day route
+        :param day: int
+        :param route: int
+        :return: array of available drivers indexes sorted ASC by their score for this day route, count of drivers
         """
-        score_route = self.route_days_scores[route]
+        score_route = self.route_days_scores[route] + self.drivers_scores
         day_scores = score_route[:, day]
         indexes = day_scores.argsort(kind="mergesort")
-        return self.drivers_ids[indexes]
+
+        driv_cnt = np.sum(day_scores >= self.min_available_score)
+
+        return indexes[-driv_cnt:], driv_cnt
 
     def __compute_route_scores(self):
         """
@@ -91,31 +98,25 @@ class ScheduleService:
         for i in range(self.get_no_routes()):
             route_day_score = self.__get_scores_for_days_route(i)
             self.route_days_scores.append(route_day_score)
-        print(self.route_days_scores[0])
 
+    def update_driver_used_score(self, driver_index: int):
+        self.drivers_scores[driver_index, :] = self.drivers_scores[driver_index, :] + self.weights_values["driver_used"]
 
     def __get_routes_srt_by_dri_cnt(self, day: int):
         """
-        :param day: index of day
+        :param day: int
         :return: (array of the route indexes sorted ASC by drivers cnt,
                   array of available drivers for each route)
         """
         driv_cnts = np.array([])
-        drivers_cnt_for_routes = []
+        routes_drivers_indexes = []
 
         for i in range(self.get_no_routes()):
-            route_score = self.route_days_scores[i]
-            day_score = route_score[:, day]
-
-            driv_cnt = np.sum(day_score >= self.min_available_score)
+            available_drivers_indexes, driv_cnt = self.get_available_drivers_for_route(day, i)
             driv_cnts = np.append(driv_cnts, driv_cnt)
-
-            # removing drivers with score below min required score
-            available_drivers = self.__get_available_drivers_for_route(day, i)[-driv_cnt:]
-
-            drivers_cnt_for_routes.append(available_drivers)
-
-        return driv_cnts.argsort(kind="mergesort"), drivers_cnt_for_routes
+            routes_drivers_indexes.append(available_drivers_indexes)
+        route_indexes = driv_cnts.argsort(kind="mergesort")
+        return route_indexes, routes_drivers_indexes
 
     def create_schedule(self) -> Schedule:
         """
@@ -123,26 +124,30 @@ class ScheduleService:
         """
         schedule = Schedule()
         for day_index in range(self.get_no_days()):
-            routes_indexes_sorted, available_drivers_routes = self.__get_routes_srt_by_dri_cnt(day_index)
+            routes_indexes_sorted, available_drivers_indexes = self.__get_routes_srt_by_dri_cnt(day_index)
             for routes_index in routes_indexes_sorted:
-                route_drivers_sorted = available_drivers_routes[routes_index]
+                drivers_indexes_sorted = available_drivers_indexes[routes_index]
                 shift_index, driver_counter = 0, 1
-                number_of_drivers = len(route_drivers_sorted)
+                number_of_drivers = len(drivers_indexes_sorted)
                 while shift_index < self.get_no_shifts() and driver_counter <= number_of_drivers:
-                    driver_id = route_drivers_sorted[-driver_counter]
+                    driver_index = drivers_indexes_sorted[-driver_counter]
+                    driver_id = self.get_driver_id_by_index(driver_index)
                     driver_counter += 1
                     if schedule.is_driver_day_used(day_index, driver_id):
                         continue
-                    self.test(routes_index, driver_id, day_index)
+                    # self.test(routes_index, driver_id, day_index)
                     schedule.add_row(driver_id, day_index, routes_index, shift_index)
+                    if shift_index == 1 and schedule.is_driver_shift_used(shift_index, driver_id):
+                        print(driver_id)
+                        self.update_driver_used_score(driver_index)
                     shift_index += 1
 
         return schedule
 
-    def test(self, routes_index, driver_id, day):
-        score_route = self.route_days_scores[routes_index]
-        day_scores = score_route[:, day]
-        day_scores = day_scores.reshape(day_scores.shape[0], 1)
-        driver_index = int(driver_id - 1)
-        if day_scores[driver_index][0] < 0:
-            raise Exception("issue with negatives")
+    # def test(self, routes_index, driver_id, day):
+    #     score_route = self.route_days_scores[routes_index]
+    #     day_scores = score_route[:, day]
+    #     day_scores = day_scores.reshape(day_scores.shape[0], 1)
+    #     driver_index = int(driver_id - 1)
+    #     if day_scores[driver_index][0] < 0:
+    #         raise Exception("issue with negatives")

@@ -81,7 +81,7 @@ class Schedule:
         driver_format = self.format_driver(driver_id)
         shift_format = self.format_shift(shift_index)
         driver_dict_shifts = drivers_dict.get(driver_format, {}).get("shifts", {})
-        driver_used = driver_dict_shifts.get(shift_format, 0) > 4
+        driver_used = driver_dict_shifts.get(shift_format, 0) >= 4
         return driver_used
 
     def add_row(self, driver_id: int, day_index: int, routes_index: int, shift_index: int) -> list:
