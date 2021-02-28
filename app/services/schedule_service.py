@@ -9,12 +9,13 @@ class ScheduleService:
     weights_values = {
         "routes": -100,
         "forced_days": -100,
-        "pref_working_days": -1,
-        "driver_used": -2
+        "pref_working_days": -0.5,
+        "driver_used": -1
     }
     route_days_scores = []
     min_available_score = 0
-    init_score = 20
+    init_score = 40
+    night_shift_index = 1
 
     def __init__(self, forced_days_file: str = 'forced_day_off.csv',
                  qualified_route_file: str = 'qualified_route.csv',
@@ -137,8 +138,7 @@ class ScheduleService:
                         continue
                     # self.test(routes_index, driver_id, day_index)
                     schedule.add_row(driver_id, day_index, routes_index, shift_index)
-                    if shift_index == 1 and schedule.is_driver_shift_used(shift_index, driver_id):
-                        print(driver_id)
+                    if shift_index == self.night_shift_index and schedule.is_driver_shift_used(shift_index, driver_id):
                         self.update_driver_used_score(driver_index)
                     shift_index += 1
 

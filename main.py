@@ -2,9 +2,11 @@ from app.services import ScheduleService, TableService
 import numpy as np
 
 schedule_service = ScheduleService()
-# schedule_service.update_driver_used_score(1)
-# indexes, driver = schedule_service.get_available_drivers_for_route(1, 1)
+schedule_service.update_driver_used_score(1)
+indexes, driver = schedule_service.get_available_drivers_for_route(1, 1)
+
 schedule = schedule_service.create_schedule()
+print(schedule_service.drivers_scores)
 print(schedule.get_schedule())
 ditc_dri = schedule.get_drivers_dict()
 c = 0
