@@ -3,12 +3,18 @@ from app.services import ScheduleService, TableService
 import numpy as np
 import time as t
 
-CASE_DIR = "./data/case1/"
+BASE_DIR = "./data/case1/"
+
+use_default = input("Do you want to use the default directory (./data/case1/) with input files [y/n]: ")
+if use_default == "n":
+    print("Please provide directory that contains input files")
+    print("Don't forget to add the / at the end of the directory:")
+    BASE_DIR = input("You directory: ")
 
 schedule_service = ScheduleService(
-    forced_days_file=CASE_DIR + 'forced_day_off.csv',
-    qualified_route_file=CASE_DIR + 'qualified_route.csv',
-    pref_days_file=CASE_DIR + 'pref_day_off.csv',
+    forced_days_file=BASE_DIR + 'forced_day_off.csv',
+    qualified_route_file=BASE_DIR + 'qualified_route.csv',
+    pref_days_file=BASE_DIR + 'pref_day_off.csv',
 )
 
 schedule = schedule_service.create_schedule()
