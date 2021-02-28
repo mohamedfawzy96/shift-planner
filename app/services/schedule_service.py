@@ -7,14 +7,14 @@ from .table_service import TableService
 class ScheduleService:
     driver_id_index = 0
     weights_values = {
-        "routes": -100,
+        "unqualified_routes": -100,
         "forced_days": -100,
         "pref_working_days": -0.5,
-        "driver_used": -1
+        "driver_used": -0.5
     }
     route_days_scores = []
     min_available_score = 0
-    init_score = 40
+    init_score = 20
     night_shift_index = 1
 
     def __init__(self, forced_days_file: str = 'case1/forced_day_off.csv',
@@ -74,14 +74,14 @@ class ScheduleService:
         invert_route_col = route_col == 0
         invert_route_col = invert_route_col.reshape(route_col.shape[0], 1)
 
-        route_score_matrix = self.days_scores + (invert_route_col * self.weights_values["routes"])
+        route_score_matrix = self.days_scores + (invert_route_col * self.weights_values["unqualified_routes"])
         return route_score_matrix
 
     def get_available_drivers_for_route(self, day: int, route: int) -> np.array:
         """
         :param day: int
         :param route: int
-        :return: array of available drivers indexes sorted ASC by their score for this day route, count of drivers
+        :return: (array, int) array of available drivers indexes sorted ASC by their score for this day's route, count of drivers (int)
         """
         score_route = self.route_days_scores[route] + self.drivers_scores
         day_scores = score_route[:, day]
@@ -125,29 +125,39 @@ class ScheduleService:
         """
         schedule = Schedule()
         for day_index in range(self.get_no_days()):
+
+            """ 
+                NOTE: routes_indexes_sorted  consist of indices and not the actual values, the first
+                element for example is the index of the route with the lowest number of drivers available   
+            """
             routes_indexes_sorted, available_drivers_indexes = self.__get_routes_srt_by_dri_cnt(day_index)
             for routes_index in routes_indexes_sorted:
+                """ 
+                    NOTE: drivers_indexes_sorted  consist of indices and not the actual values, the first
+                    element for example is the index of the driver with the lowest score  
+                """
                 drivers_indexes_sorted = available_drivers_indexes[routes_index]
-                shift_index, driver_counter = 0, 1
+                shift_index, driver_counter = self.get_no_shifts() - 1, 1
                 number_of_drivers = len(drivers_indexes_sorted)
-                while shift_index < self.get_no_shifts() and driver_counter <= number_of_drivers:
+
+                """
+                assigning drivers to the night shift first is important
+                because drivers are sorted with their scores and this score
+                is based on different things one of them is the number of night
+                shifts this driver has been assigned to, so giving the night shift
+                drivers with high scores is important 
+                """
+                while shift_index >= 0 and driver_counter <= number_of_drivers:
                     driver_index = drivers_indexes_sorted[-driver_counter]
                     driver_id = self.get_driver_id_by_index(driver_index)
                     driver_counter += 1
+
                     if schedule.is_driver_day_used(day_index, driver_id):
                         continue
-                    # self.test(routes_index, driver_id, day_index)
                     schedule.add_row(driver_id, day_index, routes_index, shift_index)
-                    if shift_index == self.night_shift_index and schedule.is_driver_shift_used(shift_index, driver_id):
+
+                    if shift_index == self.night_shift_index:
                         self.update_driver_used_score(driver_index)
-                    shift_index += 1
+                    shift_index -= 1
 
         return schedule
-
-    # def test(self, routes_index, driver_id, day):
-    #     score_route = self.route_days_scores[routes_index]
-    #     day_scores = score_route[:, day]
-    #     day_scores = day_scores.reshape(day_scores.shape[0], 1)
-    #     driver_index = int(driver_id - 1)
-    #     if day_scores[driver_index][0] < 0:
-    #         raise Exception("issue with negatives")
