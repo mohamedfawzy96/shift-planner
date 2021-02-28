@@ -14,7 +14,7 @@ class ScheduleService:
     }
     route_days_scores = []
     min_available_score = 0
-    init_score = 20
+    init_score = 40
     night_shift_index = 1
 
     def __init__(self, forced_days_file: str = 'case1/forced_day_off.csv',
