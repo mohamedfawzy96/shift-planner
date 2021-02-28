@@ -7,8 +7,8 @@ from .table_service import TableService
 class ScheduleService:
     driver_id_index = 0
     weights_values = {
-        "routes": -20,
-        "forced_days": -20,
+        "routes": -1000,
+        "forced_days": -1000,
         "pref_working_days": -1
     }
     route_days_scores = []

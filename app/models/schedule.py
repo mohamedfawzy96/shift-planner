@@ -57,6 +57,12 @@ class Schedule:
         return self.schedule_dict["drivers"]
 
     def is_driver_day_used(self, day_index: int, driver_id: int):
+        """
+        Checks if the driver has been used on this day using the scheduler dict
+        :param day_index: int
+        :param driver_id: int
+        :return: driver_used: bool
+        """
         drivers_dict = self.get_drivers_dict()
         driver_format = self.format_driver(driver_id)
         day_format = self.format_day(day_index)
@@ -65,6 +71,12 @@ class Schedule:
         return driver_used
 
     def is_driver_shift_used(self, shift_index: int, driver_id: int) -> bool:
+        """
+        Checks if driver has been assigned to more than 4 shifts
+        :param shift_index: int
+        :param driver_id: int
+        :return: driver_used: bool
+        """
         drivers_dict = self.get_drivers_dict()
         driver_format = self.format_driver(driver_id)
         shift_format = self.format_shift(shift_index)
@@ -73,6 +85,14 @@ class Schedule:
         return driver_used
 
     def add_row(self, driver_id: int, day_index: int, routes_index: int, shift_index: int) -> list:
+        """
+        Adds to row to schedule and updates the schedule dict
+        :param driver_id: int
+        :param day_index: int
+        :param routes_index: int
+        :param shift_index: int
+        :return: row: list
+        """
         row = [driver_id,
                Schedule.format_day(day_index),
                Schedule.format_route(routes_index),
@@ -83,6 +103,13 @@ class Schedule:
         return row
 
     def __add_to_dict(self, driver_id: int, day_index: int, routes_index: int, shift_index: int):
+        """
+        Performs dict update operations for driver, day and route
+        :param driver_id: int
+        :param day_index: int
+        :param routes_index: int
+        :param shift_index: int
+        """
         day_formatted = Schedule.format_day(day_index)
         self.__add_driver_arr_to_dict(day_formatted, driver_id, self.get_day_dict())
 
@@ -94,6 +121,13 @@ class Schedule:
         self.__add_driver_info_to_dict(driver_id, day_formatted, shift_formatted)
 
     def __add_driver_info_to_dict(self, driver_id: int, day_formatted: str, shift_formated: str):
+        """
+        Updates the drivers_dict by marking the day and shift given as used
+        :param driver_id: int
+        :param day_formatted: str
+        :param shift_formated: str
+        :return:
+        """
         drivers_dict = self.get_drivers_dict()
         driver_formated = Schedule.format_driver(driver_id)
         driver = drivers_dict.get(driver_formated, {})
@@ -106,6 +140,13 @@ class Schedule:
         drivers_dict[driver_formated] = driver
 
     def __add_driver_arr_to_dict(self, formated_col: str, driver_id: int, parent_dict: dict):
+        """
+        adds new driver to drivers array of the  parent_dict
+        :param formated_col:str
+        :param driver_id: int
+        :param parent_dict: dict
+        :return: parent_dict : dict
+        """
         ob_dict = parent_dict.get(formated_col, {})
         ob_dict = self.__add_key_to_dict_arr(ob_dict, driver_id, "drivers")
         parent_dict[formated_col] = ob_dict
