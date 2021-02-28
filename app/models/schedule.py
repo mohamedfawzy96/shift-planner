@@ -61,7 +61,7 @@ class Schedule:
         Checks if the driver has been used on this day using the scheduler dict
         :param day_index: int
         :param driver_id: int
-        :return: driver_used: bool
+        :return: bool
         """
         drivers_dict = self.get_drivers_dict()
         driver_format = self.format_driver(driver_id)
@@ -75,7 +75,7 @@ class Schedule:
         Checks if driver has been assigned to more than 4 shifts
         :param shift_index: int
         :param driver_id: int
-        :return: driver_used: bool
+        :return: bool
         """
         drivers_dict = self.get_drivers_dict()
         driver_format = self.format_driver(driver_id)
@@ -91,7 +91,7 @@ class Schedule:
         :param day_index: int
         :param routes_index: int
         :param shift_index: int
-        :return: row: list
+        :return: list
         """
         row = [driver_id,
                Schedule.format_day(day_index),
@@ -122,7 +122,6 @@ class Schedule:
 
     def __add_driver_info_to_dict(self, driver_id: int, day_formatted: str, shift_formated: str):
         """
-        Updates the drivers_dict by marking the day and shift given as used
         :param driver_id: int
         :param day_formatted: str
         :param shift_formated: str
