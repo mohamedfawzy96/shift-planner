@@ -3,21 +3,6 @@ from app.services import ScheduleService, TableService
 import numpy as np
 import time as t
 
-
-# just for testing
-def add_warning(schedule_obj: Schedule):
-    ditc_dri = schedule_obj.get_drivers_dict()
-    c = 0
-    for driver in ditc_dri:
-        if "shift2" in ditc_dri[driver]["shifts"] and ditc_dri[driver]["shifts"]["shift2"] > 4:
-            c += 1
-    if c > 0:
-        print("######## WARNING ###########")
-        print(str(c), " Drivers have more than 4 night shifts")
-        print("#############################")
-        print("\n")
-
-
 CASE_DIR = "case1"
 
 schedule_service = ScheduleService(
@@ -27,7 +12,6 @@ schedule_service = ScheduleService(
 )
 
 schedule = schedule_service.create_schedule()
-add_warning(schedule)
 
 OUTPUT_BASE_DIR = "./data/output/"
 
