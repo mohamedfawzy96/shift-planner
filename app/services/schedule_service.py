@@ -12,7 +12,6 @@ class ScheduleService:
         "pref_working_days": -0.5,
         "driver_used": -0.5
     }
-    route_days_scores = []
     min_available_score = 0
     init_score = 40
     night_shift_index = 1
@@ -29,6 +28,7 @@ class ScheduleService:
         self.perfer_days_ser = TableService(pref_days_file)
 
         self.drivers_ids = self.forced_days_ser.get_drivers()
+        self.route_days_scores = []
 
         self.days_scores = np.zeros(self.forced_days_ser.get_matrix().shape) + self.init_score
         self.drivers_scores = np.zeros(self.forced_days_ser.get_matrix().shape)
