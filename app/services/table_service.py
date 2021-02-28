@@ -2,7 +2,7 @@ import numpy as np
 
 
 class TableService:
-    base_dir = './data/'
+    base_dir = ''
 
     def __init__(self,
                  file: str):

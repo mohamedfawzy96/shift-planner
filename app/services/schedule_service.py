@@ -16,9 +16,9 @@ class ScheduleService:
     init_score = 40
     night_shift_index = 1
 
-    def __init__(self, forced_days_file: str = 'case1/forced_day_off.csv',
-                 qualified_route_file: str = 'case1/qualified_route.csv',
-                 pref_days_file: str = 'case1/pref_day_off.csv',
+    def __init__(self, forced_days_file: str = './data/case1/forced_day_off.csv',
+                 qualified_route_file: str = './data/case1/qualified_route.csv',
+                 pref_days_file: str = './data/case1/pref_day_off.csv',
                  number_of_days: int = 14,
                  number_of_routes: int = 3,
                  number_of_shifts: int = 2):

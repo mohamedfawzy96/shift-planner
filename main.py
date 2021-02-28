@@ -3,12 +3,12 @@ from app.services import ScheduleService, TableService
 import numpy as np
 import time as t
 
-CASE_DIR = "case1"
+CASE_DIR = "./data/case1/"
 
 schedule_service = ScheduleService(
-    forced_days_file=CASE_DIR + '/forced_day_off.csv',
-    qualified_route_file=CASE_DIR + '/qualified_route.csv',
-    pref_days_file=CASE_DIR + '/pref_day_off.csv',
+    forced_days_file=CASE_DIR + 'forced_day_off.csv',
+    qualified_route_file=CASE_DIR + 'qualified_route.csv',
+    pref_days_file=CASE_DIR + 'pref_day_off.csv',
 )
 
 schedule = schedule_service.create_schedule()

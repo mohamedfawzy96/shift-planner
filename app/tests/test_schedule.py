@@ -4,12 +4,14 @@ import numpy as np
 from app.models import Schedule
 from app.services import ScheduleService, TableService
 
+BASE_DIR = './data/'
+
 
 def get_cases():
     case_tests = []
     cases = ["case1", "case2", "case3"]
     for i in range(len(cases)):
-        case = cases[i]
+        case = BASE_DIR + cases[i]
         schedule_service = ScheduleService(forced_days_file=case + '/forced_day_off.csv',
                                            qualified_route_file=case + '/qualified_route.csv',
                                            pref_days_file=case + '/pref_day_off.csv', )
