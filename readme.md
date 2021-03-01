@@ -15,7 +15,7 @@ The input files provided is found in `data/case1` directory.
 ```
  python ./main.py
 ```
-* You will be asked if you want to use your own directory.
+* You will be asked if you want to use the default directory.
 
 ```Do you want to use the default directory (./data/case1/) with input files [y/n]:```
 
