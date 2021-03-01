@@ -47,7 +47,7 @@ def test_unique_drivers_in_day(schedule_service, schedule):
 
 @pytest.mark.parametrize("schedule_service,schedule", case_tests)
 def test_forced_days_off(schedule_service, schedule):
-    """Test every shift for every route of the day has unique driver"""
+    """Test if no driver is assigned to forced day off"""
     for day_index in range(schedule_service.get_no_days()):
         forced_day_ser = schedule_service.forced_days_ser
         day_drivers = schedule.get_day_drivers(day_index)
@@ -58,7 +58,7 @@ def test_forced_days_off(schedule_service, schedule):
 
 @pytest.mark.parametrize("schedule_service,schedule", case_tests)
 def test_route_off(schedule_service, schedule):
-    """Test every shift for every route of the day has unique driver"""
+    """Test if drivers are assigned to their qualified routes"""
     for route_index in range(schedule_service.get_no_routes()):
         route_driver_ser = schedule_service.qual_route_ser
         route_drivers = schedule.get_route_drivers(route_index)

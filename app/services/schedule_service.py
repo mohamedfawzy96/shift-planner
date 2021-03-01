@@ -13,7 +13,7 @@ class ScheduleService:
         "driver_used": -0.5
     }
     min_available_score = 0
-    init_score = 40
+    init_score = 50
     night_shift_index = 1
 
     def __init__(self, forced_days_file: str = './data/case1/forced_day_off.csv',
@@ -30,7 +30,7 @@ class ScheduleService:
         self.drivers_ids = self.forced_days_ser.get_drivers()
         self.route_days_scores = []
 
-        self.days_scores = np.zeros(self.forced_days_ser.get_matrix().shape) + self.init_score
+        self.base_scores = np.zeros(self.forced_days_ser.get_matrix().shape) + self.init_score
         self.drivers_scores = np.zeros(self.forced_days_ser.get_matrix().shape)
         self.number_of_days = number_of_days
         self.number_of_routes = number_of_routes
@@ -54,11 +54,11 @@ class ScheduleService:
     def __compute_scores_without_routes(self):
         def compute_forc_day_off_scr():
             forced_matrix = self.forced_days_ser.get_matrix()
-            self.days_scores = self.days_scores + (forced_matrix * self.weights_values["forced_days"])
+            self.base_scores = self.base_scores + (forced_matrix * self.weights_values["forced_days"])
 
         def compute_pref_day_off_scr():
             invert_pref_day = self.perfer_days_ser.get_matrix() == 0
-            self.days_scores = self.days_scores + (invert_pref_day * self.weights_values["pref_working_days"])
+            self.base_scores = self.base_scores + (invert_pref_day * self.weights_values["pref_working_days"])
 
         score_funcs = [compute_forc_day_off_scr, compute_pref_day_off_scr]
         for score_func in score_funcs:
@@ -74,7 +74,7 @@ class ScheduleService:
         invert_route_col = route_col == 0
         invert_route_col = invert_route_col.reshape(route_col.shape[0], 1)
 
-        route_score_matrix = self.days_scores + (invert_route_col * self.weights_values["unqualified_routes"])
+        route_score_matrix = self.base_scores + (invert_route_col * self.weights_values["unqualified_routes"])
         return route_score_matrix
 
     def get_available_drivers_for_route(self, day: int, route: int) -> np.array:
@@ -106,7 +106,7 @@ class ScheduleService:
     def __get_routes_srt_by_dri_cnt(self, day: int):
         """
         :param day: int
-        :return: (array of the route indexes sorted ASC by drivers cnt,
+        :return: (list, list) (array of the route indexes sorted ASC by drivers cnt,
                   array of available drivers for each route)
         """
         driv_cnts = np.array([])

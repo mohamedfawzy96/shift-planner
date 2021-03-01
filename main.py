@@ -5,11 +5,11 @@ import time as t
 
 BASE_DIR = "./data/case1/"
 
-use_default = input("Do you want to use the default directory (./data/case1/) with input files [y/n]: ")
+use_default = input("Do you want to use the default directory (./data/case1/) for input files [y/n]: ")
 if use_default == "n":
     print("Please provide directory that contains input files")
     print("Don't forget to add the / at the end of the directory:")
-    BASE_DIR = input("You directory: ")
+    BASE_DIR = input("Your directory: ")
 
 schedule_service = ScheduleService(
     forced_days_file=BASE_DIR + 'forced_day_off.csv',

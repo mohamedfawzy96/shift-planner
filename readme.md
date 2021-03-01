@@ -23,6 +23,10 @@ The input files provided is found in `data/case1` directory.
 
 * Say no if you want to provide your own directory. But please make sure that the files inside
 of this directory has the correct naming (forced_day_off.csv, qualified_route.csv, pref_day_off.csv)
+```Please provide directory that contains input files
+Don't forget to add the / at the end of the directory:
+Your directory: 
+```
 
 # Run Tests
 To run unit test please run the following command.
